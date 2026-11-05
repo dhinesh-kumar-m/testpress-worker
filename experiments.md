@@ -274,19 +274,25 @@ On my machine, `-p warning` showed the whole day's trouble in one list. After th
 ## Questions for the demonstration
 
 **What is the difference between SIGTERM and SIGKILL?**
+
 SIGTERM asks the program to stop, and the program can clean up first or even ignore it. SIGKILL is done by the kernel, and the program cannot catch it or run any code.
 
 **Why doesn't `nohup` provide the same reliability as systemd?**
+
 `nohup` only stops the program from dying when you close the terminal. If the program crashes, nothing restarts it. If the server reboots, nothing starts it again. Its logs go to a file that nobody watches, and there are no memory limits.
 
 **What happens when a service crashes repeatedly?**
+
 systemd restarts it after each crash, as long as `Restart=` says so. If it starts too many times within a short time (`StartLimitBurst` within `StartLimitIntervalSec`), systemd gives up and marks it as failed until someone runs `reset-failed`.
 
 **What is the difference between restarting a process and restarting a service?**
+
 Restarting a process means you kill a program and start it again yourself. systemd doesn't know why, and doesn't keep the settings, user, limits or logs for you. Restarting a service means systemd stops it (SIGTERM first, then SIGKILL if it takes too long), then starts it again with the same user, settings and limits, and writes it all to the log.
 
 **What happens to child processes when a systemd service is stopped?**
+
 By default systemd stops every process in the service's cgroup, not just the main one. Children started by the program are stopped too, so nothing is left behind. This is controlled by `KillMode=`.
 
 **How would you ensure a Celery worker finishes its current task before shutting down?**
+
 Celery treats SIGTERM as "warm shutdown": it stops taking new tasks and finishes the ones it is running. My `app.py` does the same thing on a small scale. In the service file, I would set `TimeoutStopSec=` longer than the longest task, so systemd doesn't send SIGKILL before the task is done. `KillMode=mixed` sends SIGTERM only to the main Celery process and lets it shut down its own workers.
