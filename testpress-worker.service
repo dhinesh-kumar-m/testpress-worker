@@ -14,6 +14,9 @@ Restart=on-failure
 RestartSec=3
 StandardOutput=journal
 StandardError=journal
+MemoryMax=50M
+MemorySwapMax=0
+CPUQuota=20%
 
 [Install]
 WantedBy=multi-user.target
