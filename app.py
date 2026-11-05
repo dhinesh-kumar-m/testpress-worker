@@ -9,6 +9,9 @@ running = True
 INTERVAL = int(os.environ.get("HEARTBEAT_INTERVAL", "5"))
 CRASH_AFTER = int(os.environ.get("CRASH_AFTER", "0"))
 
+ALLOCATE_MB = int(os.environ.get("ALLOCATE_MB", "0"))
+hog = []
+
 def log(message):
     print(f"{datetime.now()} pid={os.getpid()} {message}", flush=True)
 
@@ -27,6 +30,9 @@ count = 0
 while running:
     count += 1
     log(f"heartbeat {count}")
+    if ALLOCATE_MB:
+        hog.append(bytearray(ALLOCATE_MB * 1024 * 1024))
+        log(f"holding {len(hog) * ALLOCATE_MB} MB")
     if CRASH_AFTER and count >= CRASH_AFTER:
         log("simulated crash")
         sys.exit(1)
